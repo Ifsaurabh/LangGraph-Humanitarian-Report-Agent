@@ -1,7 +1,10 @@
+# imports
 import requests
 import pandas as pd
 
-def fetch_hdx_data(dataset_name: str) -> dict:
+
+# data fetch function
+def fetch_hdx_data(dataset_name: str, keyword: str = None) -> dict:
     url = f"https://data.humdata.org/api/3/action/package_show?id={dataset_name}"
     try:
         raw_data = requests.get(url=url, timeout=10)
@@ -15,12 +18,21 @@ def fetch_hdx_data(dataset_name: str) -> dict:
     resources = data_json['result']['resources']
     if not resources:
         return {"error": "No resources found in this dataset"}
-    latest  = max(resources, key=lambda r: r['last_modified'])
+    
+    if keyword:
+        filtered = [r for r in resources if keyword.lower() in r['name'].lower()]
+        if not filtered:
+            return {"error": f"No resources matching '{keyword}' found"}
+    else:
+        filtered = resources
+            
+    latest  = max(filtered, key=lambda r: r['last_modified'])
     return{
         "download_url": latest["download_url"],
         "last_modified": latest["last_modified"],
         "format": latest['format']
     }
+    
     
     
 def load_hdx_csv(download_url: str) -> pd.DataFrame:
