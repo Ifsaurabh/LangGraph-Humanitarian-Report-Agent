@@ -1,4 +1,5 @@
 import requests
+import pandas as pd
 
 def fetch_hdx_data(dataset_name: str) -> dict:
     url = f"https://data.humdata.org/api/3/action/package_show?id={dataset_name}"
@@ -21,3 +22,11 @@ def fetch_hdx_data(dataset_name: str) -> dict:
         "format": latest['format']
     }
     
+    
+def load_hdx_csv(download_url: str) -> pd.DataFrame:
+    try:
+        df = pd.read_csv(download_url)
+    except Exception as e:
+        return {"error": str(e)}
+    return df
+
