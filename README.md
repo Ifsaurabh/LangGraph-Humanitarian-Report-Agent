@@ -101,11 +101,13 @@ This ensures the agent's reports reflect real-time conditions, not a point-in-ti
 
 ## Progress
 
+## Progress
 - [x] Project skeleton + repo setup
 - [x] HDX tool — dynamic dataset resolver (`fetch_hdx_data`)
-- [ ] HDX tool — load CSV data into DataFrame
+- [x] HDX tool — CSV loader (`load_hdx_csv`)
+- [x] Query tool — filter/aggregate data (`query_data`)
 - [ ] ReliefWeb tool (pending API appname approval)
-- [ ] LangGraph state schema
+- [x] LangGraph state schema
 - [ ] Analysis node
 - [ ] Report generation node
 - [ ] FastAPI endpoint
