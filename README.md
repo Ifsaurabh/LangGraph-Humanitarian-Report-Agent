@@ -113,6 +113,29 @@ The agent autonomously:
 
 ---
 
+## Demo - Screenshots
+
+### Swagger UI
+![Home](screenshots/01_swagger_home.png)
+
+### Try it out
+![Try it out](screenshots/02_tryout.png)
+
+### Enter question
+![Question](screenshots/03_question.png)
+
+### Authorization — prompt
+![Auth prompt](screenshots/04_auth_prompt.png)
+
+### Authorization — credentials
+![Auth credentials](screenshots/05_auth_credentials.png)
+
+### Invalid credentials — 401
+![Invalid credentials](screenshots/06_invalid_credentials.png)
+
+### Successful response
+![Response](screenshots/07_response.png)
+
 ## Design Principle: Live & Dynamic Data
 
 Tools resolve the **current** data source at call time rather than using hardcoded snapshots:
