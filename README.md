@@ -2,7 +2,7 @@
 
 Autonomous agent that fetches live humanitarian data, analyzes it, and generates structured risk reports — built with LangGraph and Anthropic Claude.
 
-## Status: 🚧 In Development
+## Status: ✅ Core Pipeline Complete
 
 ---
 
@@ -12,7 +12,8 @@ This agent runs an end-to-end pipeline with no human in the loop:
 
 1. **Fetches** live data from humanitarian APIs (OCHA HDX, ReliefWeb)
 2. **Analyzes** the data for patterns, trends, and risk indicators
-3. **Generates** a structured report (markdown/PDF) summarizing findings
+3. **Generates** a structured report (markdown) summarizing findings
+4. **Serves** the report via a REST API endpoint
 
 It's the agentic counterpart to [RAG-Humanitarian-risk-analysis-india](https://github.com/Ifsaurabh/RAG-Humanitarian-risk-analysis-India) — that project answers questions over a static knowledge base; this one autonomously acts on live data.
 
@@ -31,9 +32,10 @@ Three things this demonstrates that a RAG project doesn't:
 
 | Component | Tool |
 |---|---|
-| Agent orchestration | LangGraph (StateGraph, nodes, conditional edges) |
+| Agent orchestration | LangGraph (StateGraph, nodes, edges) |
 | LLM | Anthropic Claude (Haiku) |
-| Serving | FastAPI |
+| Serving | FastAPI + uvicorn |
+| Cloud storage | AWS S3 (boto3) |
 | Data source 1 | OCHA HDX API (food prices, poverty indicators) |
 | Data source 2 | ReliefWeb API (live situation reports) — pending appname approval |
 
@@ -41,50 +43,69 @@ Three things this demonstrates that a RAG project doesn't:
 
 ## Architecture
 
+```
 agent/
+├── tools/
+│   ├── hdx_tool.py          # HDX data fetcher
+│   ├── query_tool.py        # Filter/aggregate cached DataFrames
+│   └── tool_definitions.py  # JSON schemas for all tools
+├── graph.py                 # LangGraph StateGraph
+└── state.py                 # Shared state schema
 
-├── tools/          # Data-fetching tools (HDX, ReliefWeb)
-
-│   └── hdx_tool.py
-
-├── graph.py         # LangGraph StateGraph — wires nodes together
-
-└── state.py         # Shared state schema passed between nodes
-
-main.py               # FastAPI entry point
+main.py                      # FastAPI entry point
+```
 
 ---
 
 ## How It Works (Flow)
 
+```
 [Start]
+↓
+[Data Gathering Node] — ReAct tool-calling loop
+  LLM reads question, decides which tools to call
+  Tools: get_food_price_data, get_poverty_data, query_data
+↓
+[Analysis Node]
+  LLM reasons over gathered data
+↓
+[Report Generation Node]
+  Produces structured markdown report
+↓
+[Save/Store Node]
+  Saves locally + uploads to S3
+↓
+[END]
+```
 
-│
+---
 
-▼
+## API Usage
 
-[Fetch Node] ──► calls HDX/ReliefWeb tools to get live data
+Start the server:
+```bash
+uvicorn main:app --reload
+```
 
-│
+POST a question:
+```bash
+curl -X POST "http://localhost:8000/question" \
+  -H "Content-Type: application/json" \
+  -d '{"question": "What is the food security situation in Bihar?"}'
+```
 
-▼
+Interactive docs: `http://localhost:8000/docs`
 
-[Analysis Node] ──► processes data, identifies patterns/risk signals
+---
 
-│
+## Sample Output
 
-▼
+Query: *"What is the food security situation in Bihar?"*
 
-[Report Generation Node] ──► produces structured markdown report
-
-│
-
-▼
-
-[End]
-
-
-Each node reads from and writes to a shared `state` object (LangGraph pattern from Section 12 — same pattern used in the earlier Earthquake Report Generator build).
+The agent autonomously:
+- Fetched live food price and poverty data from OCHA HDX
+- Identified that 54.64% of Bihar's population is at food security risk
+- Generated a structured report with risk assessment, severity table, and prioritized recommendations
 
 ---
 
@@ -92,26 +113,26 @@ Each node reads from and writes to a shared `state` object (LangGraph pattern fr
 
 Tools resolve the **current** data source at call time rather than using hardcoded snapshots:
 
-- The HDX tool queries `package_show` on the HDX CKAN API to find the dataset's *latest* resource URL dynamically — if the upstream provider updates the file, the agent picks up the new version automatically, with no code change required.
-- ReliefWeb's `/v2/reports` endpoint is inherently live — always returns the most recent reports for a given filter.
-
-This ensures the agent's reports reflect real-time conditions, not a point-in-time snapshot.
+- The HDX tool queries `package_show` on the HDX CKAN API to find the dataset's latest resource URL dynamically
+- ReliefWeb's `/v2/reports` endpoint always returns the most recent reports
 
 ---
 
 ## Progress
 
-## Progress
 - [x] Project skeleton + repo setup
-- [x] HDX tool — dynamic dataset resolver (`fetch_hdx_data`)
-- [x] HDX tool — CSV loader (`load_hdx_csv`)
-- [x] Query tool — filter/aggregate data (`query_data`)
-- [ ] ReliefWeb tool (pending API appname approval)
+- [x] HDX tool — dynamic dataset resolver
+- [x] HDX tool — CSV loader
+- [x] Query tool — filter/aggregate data
 - [x] LangGraph state schema
-- [ ] Analysis node
-- [ ] Report generation node
-- [ ] FastAPI endpoint
-- [ ] README — usage instructions + demo
+- [x] Data gathering node — ReAct loop + parallel tool calls
+- [x] Analysis node
+- [x] Report generation node
+- [x] Save/store node — local + S3 upload
+- [x] FastAPI endpoint — POST /question
+- [ ] ReliefWeb tool (pending API appname approval)
+- [ ] Basic authentication
+- [ ] Demo screenshots
 
 ---
 
