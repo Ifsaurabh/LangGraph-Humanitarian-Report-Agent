@@ -2,7 +2,7 @@
 
 # imports
 from fastapi import FastAPI, HTTPException, Depends
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import TypedDict
 import uvicorn
 from agent.graph import app as aga
@@ -25,7 +25,8 @@ app = FastAPI(title="Autonomous Humanitarian Report Generator")
 
 # pydantic model
 class QueryRequest(BaseModel):
-    question: str
+    question: str = Field(min_length= 20, max_length= 500)
+    
     
 class QueryResponse(BaseModel):
     answer: str
@@ -38,6 +39,8 @@ def get_report(request: QueryRequest, credentials: HTTPBasicCredentials = Depend
         not secrets.compare_digest(credentials.password, correct_password):
             raise HTTPException(status_code=401, detail = "Invalid credentials")
     
+    if not request.question.strip():
+        raise HTTPException(status_code=400, detail="Question cannot be empty")
     try:
         final_report = aga.invoke({"question": request.question})
     except anthropic.APIError as ae:

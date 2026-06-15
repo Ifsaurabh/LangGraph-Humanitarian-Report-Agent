@@ -44,15 +44,19 @@ Three things this demonstrates that a RAG project doesn't:
 ## Architecture
 
 ```
-agent/
-├── tools/
-│   ├── hdx_tool.py          # HDX data fetcher
-│   ├── query_tool.py        # Filter/aggregate cached DataFrames
-│   └── tool_definitions.py  # JSON schemas for all tools
-├── graph.py                 # LangGraph StateGraph
-└── state.py                 # Shared state schema
-
-main.py                      # FastAPI entry point
+project-root/
+├── agent/
+│   ├── graph.py
+│   ├── state.py
+│   └── tools/
+│       ├── hdx_tool.py
+│       ├── query_tool.py
+│       └── tool_definitions.py
+├── lang_food_poverty_output/    # sample generated reports
+├── main.py
+├── .env.example
+├── requirements.txt
+└── README.md
 ```
 
 ---
