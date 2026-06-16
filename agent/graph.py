@@ -108,7 +108,15 @@ def generate_report_node(state: AgentState) -> dict:
     response = anthropic_client.messages.create(
         model='claude-haiku-4-5-20251001',
         max_tokens=4096,
-        system="You are a humanitarian data analyst. Generate a structured markdown report with sections: Executive Summary, Key Findings, Risk Assessment, and Recommendations.",
+        system=(
+            "You are a humanitarian data analyst. Generate a structured "
+            "markdown report with sections: Executive Summary, Key Findings, "
+            "Risk Assessment, and Recommendations. "
+            "If the analysis indicates that a data source failed, errored, "
+            "or could not be retrieved, explicitly state this as a limitation "
+            "in the report (e.g. under Key Findings or as a noted gap). "
+            "Do not fabricate, estimate, or guess values for missing or failed data."
+        ),
         messages=[{"role":"user", "content": context}]
     )
     return {"final_report": response.content[0].text}
