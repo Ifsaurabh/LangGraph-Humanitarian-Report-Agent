@@ -100,6 +100,17 @@ curl -X POST "http://localhost:8000/question" \
 
 Interactive docs: `http://localhost:8000/docs`
 
+**Optional: run with Docker instead**
+
+```bash
+docker compose up --build
+```
+This builds and runs the same app via the included `docker-compose.yml`, 
+mapped to the same port 8000. Note: the live EC2 deployment described below 
+actually runs via plain `uvicorn` + `nohup`, not Docker — this Compose 
+file is provided as a convenient way to run the app locally without 
+setting up a virtual environment.
+
 ---
 
 ## Sample Output
@@ -145,6 +156,36 @@ Tools resolve the **current** data source at call time rather than using hardcod
 
 ---
 
+## Try It Live
+
+A live demo is deployed on the same AWS EC2 instance as Project 1 (plain 
+uvicorn, port 8000). Since this instance doesn't have an Elastic IP, 
+confirm the current public IP before connecting (it changes on instance 
+stop/start).
+
+- **Swagger UI:** `http://<current-ec2-ip>:8000/docs`
+- **Username:** `demo`
+- **Password:** `demo-humanitarian-2026`
+
+Open the link, click "Authorize" in Swagger UI, enter the credentials above, 
+then try the `/question` endpoint with something like *"What is the food 
+security situation in Bihar?"*
+
+---
+
+## Known Limitations & Production Considerations
+
+- **HTTP only (no TLS):** This demo deployment runs over plain HTTP on a 
+  single EC2 instance without a domain name. In production, this would be 
+  addressed with a registered domain, Nginx as a reverse proxy, and 
+  Let's Encrypt for free TLS certificates (via Certbot). Deferred here to 
+  keep the deployment footprint minimal for a portfolio demo — the focus 
+  of this project is the RAG/agent architecture, not infra hardening.
+- **No Elastic IP:** Public IP changes on instance stop/start since this 
+  is a cost-optimized t3.micro setup without a static IP allocation.
+
+  ---
+
 ## Progress
 
 - [x] Project skeleton + repo setup
@@ -158,8 +199,8 @@ Tools resolve the **current** data source at call time rather than using hardcod
 - [x] Save/store node — local + S3 upload
 - [x] FastAPI endpoint — POST /question
 - [ ] ReliefWeb tool (pending API appname approval)
-- [ ] Basic authentication
-- [ ] Demo screenshots
+- [x] Basic authentication
+- [x] Demo screenshots
 
 ---
 

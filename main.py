@@ -1,4 +1,4 @@
-
+    
 
 # imports
 from fastapi import FastAPI, HTTPException, Depends
@@ -19,6 +19,8 @@ load_dotenv()
 security = HTTPBasic()
 correct_username = os.getenv("BASIC_AUTH_USERNAME")
 correct_password = os.getenv("BASIC_AUTH_PASSWORD")
+demo_username = os.getenv("DEMO_USERNAME")
+demo_password = os.getenv("DEMO_PASSWORD")
 
 # App
 app = FastAPI(title="Autonomous Humanitarian Report Generator")
@@ -34,10 +36,23 @@ class QueryResponse(BaseModel):
 
 @app.post("/question",  response_model=QueryResponse)
 def get_report(request: QueryRequest, credentials: HTTPBasicCredentials = Depends(security)):
-    
-    if not secrets.compare_digest(credentials.username, correct_username) or \
-        not secrets.compare_digest(credentials.password, correct_password):
-            raise HTTPException(status_code=401, detail = "Invalid credentials")
+
+    if correct_username is None or correct_password is None:
+        raise HTTPException(
+            status_code=500,
+            detail="Server misconfiguration: auth credentials not set"
+        )
+
+    valid_pairs = [(correct_username, correct_password)]
+    if demo_username and demo_password:
+        valid_pairs.append((demo_username, demo_password))
+
+    is_valid = any(
+        secrets.compare_digest(credentials.username, u) and secrets.compare_digest(credentials.password, p)
+        for u, p in valid_pairs
+    )
+    if not is_valid:
+        raise HTTPException(status_code=401, detail = "Invalid credentials")
     
     if not request.question.strip():
         raise HTTPException(status_code=400, detail="Question cannot be empty")

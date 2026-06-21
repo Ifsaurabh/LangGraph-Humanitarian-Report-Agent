@@ -1,0 +1,10 @@
+# docker compose file for humanitarian report agent
+version: "3.9"
+services:
+  humanitarian-report-agent:
+    build: .
+    ports:
+      - "8000:8000"
+    env_file: .env
+    volumes:
+      - ./lang_food_poverty_output:/app/lang_food_poverty_output
