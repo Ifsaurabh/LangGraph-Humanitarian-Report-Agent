@@ -34,7 +34,24 @@ class QueryResponse(BaseModel):
     answer: str
     
 
-@app.post("/question",  response_model=QueryResponse)
+@app.post("/question",  response_model=QueryResponse, description="""
+Ask questions about India's humanitarian data — get AI-generated structured reports.
+
+**Best results with questions about:**
+- Food commodity prices in a specific Indian state
+- Poverty and MPI levels by state  
+- Food security situation in a specific region
+- Price trends for a specific commodity
+
+**Suggested questions to try:**
+- "What is the rice price situation in Bihar?"
+- "What is the poverty situation in Uttar Pradesh?"
+- "What is the food security situation in Maharashtra?"
+- "What is the wheat price trend in Punjab?"
+- "What is the poverty level in Rajasthan?"
+
+**Note:** Questions must be between 20-500 characters.
+""")
 def get_report(request: QueryRequest, credentials: HTTPBasicCredentials = Depends(security)):
 
     if correct_username is None or correct_password is None:
